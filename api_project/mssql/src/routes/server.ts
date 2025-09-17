@@ -5,6 +5,8 @@ import { setupSwagger } from '../swagger';
 const app = express();
 const PORT = 9092;
 
+app.use(express.json());
+
 app.use('/', employeeRouter);
 setupSwagger(app);
 

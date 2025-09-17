@@ -17,17 +17,25 @@ export async function getEmployees(id?: number) {
   return result.recordset;
 }
 
-export async function insertEmployee(name: string, position: string) {
+export async function insertEmployee(name: string, lastname: string, jobtitle: string) {
   const pool = await connectDB();
-
   const request = pool.request();
-  request.input('Name', name);
-  request.input('Position', position);
+
+  request.input('FirstName', name);
+  request.input('LastName', lastname);
+  request.input('JobTitle', jobtitle);
 
   const result = await request.query(`
-    INSERT INTO Employee (Name, Position)
-    VALUES (@Name, @Position)
+    INSERT INTO Employee (FirstName,LastName,JobTitle)
+    OUTPUT INSERTED.EmployeeID
+    VALUES (@FirstName, @LastName, @JobTitle);
   `);
 
-  return result.rowsAffected[0]; // returns number of inserted rows (1 if success)
+  // result.recordset[0].EmployeeID will contain the new ID
+  return {
+    id: result.recordset[0].EmployeeID,
+    name,
+    lastname,
+    jobtitle
+  };
 }

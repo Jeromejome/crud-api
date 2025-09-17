@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getEmployees } from '../db/employee';
+import { getEmployees,insertEmployee } from '../db/employee';
 
 export const employeeRouter = Router();
 
@@ -21,8 +21,6 @@ employeeRouter.get('/employees', async (req: Request, res: Response) => {
     res.status(500).send('Error fetching employees');
   }
 });
-
-
 
 /**
  * @openapi
@@ -55,5 +53,54 @@ employeeRouter.get('/employees/:id', async (req: Request, res: Response) => {
   } catch (err) {
     console.error('Error fetching employee by ID:', err);
     res.status(500).send('Error fetching employee');
+  }
+});
+
+
+/**
+ * @openapi
+ * /employees:
+ *   post:
+ *     summary: Add a new employee
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               jobtitle:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Employee created successfully
+ */
+
+employeeRouter.post('/employees', async (req: Request, res: Response) => {
+  try {
+
+    console.log("------------------------");
+    console.log(req.body);
+    console.log("------------------------");
+
+    const { firstname, lastname, jobtitle } = req.body;
+
+    if (!firstname || !lastname) {
+      return res.status(400).send('firstname and lastname are required');
+    }
+
+    const inserted = await insertEmployee(firstname, lastname,jobtitle);
+
+    res.status(201).json({
+      message: 'Employee created successfully',
+      rowsAffected: inserted
+    });
+  } catch (err) {
+    console.error('Error inserting employee:', err);
+    res.status(500).send('Error inserting employee');
   }
 });
