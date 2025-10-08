@@ -39,3 +39,30 @@ export async function insertEmployee(name: string, lastname: string, jobtitle: s
     jobtitle
   };
 }
+
+export async function updateEmployee(id: number, name: string, lastname: string, jobtitle: string) {
+  const pool = await connectDB();
+  const request = pool.request();
+
+  request.input('EmployeeID', id);
+  request.input('FirstName', name);
+  request.input('LastName', lastname);
+  request.input('JobTitle', jobtitle);
+
+  const result = await request.query(`
+    UPDATE Employee
+    SET FirstName = @FirstName,
+        LastName = @LastName,
+        JobTitle = @JobTitle
+    WHERE EmployeeID = @EmployeeID;
+
+    SELECT @EmployeeID AS EmployeeID;
+  `);
+
+  return {
+    id: result.recordset[0].EmployeeID,
+    name,
+    lastname,
+    jobtitle
+  };
+}
